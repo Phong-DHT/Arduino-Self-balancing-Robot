@@ -446,6 +446,9 @@ class Ui_MainWindow(object):
             self.status_label.setText("Ngắt kết nối.")
             self.is_connected = False
             self.Connect.setEnabled(True)
+            self.Kpline_2.clear()
+            self.Kiline_2.clear()
+            self.Kdline_2.clear()
         else:
             self.status_label.setText("Không có kết nối cổng COM nào đang mở.")
 
