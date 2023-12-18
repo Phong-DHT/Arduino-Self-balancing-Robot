@@ -677,7 +677,7 @@ class Ui_MainWindow(object):
             self.status_label.setText(f"Kết nối đến {selected_port} thất bại.")
 
     def disconnect_port(self):
-        if self.serial_connection is not None and self.serial_connection.is_open:
+        if self.serial_connection is not None:
             self.serial_connection.close()
             self.status_label.setText("Ngắt kết nối.")
             self.is_connected = False
