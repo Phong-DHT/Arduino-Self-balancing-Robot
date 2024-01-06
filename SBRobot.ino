@@ -19,9 +19,9 @@ MPU6050 mpu6050(Wire);
 
 //////---------------------------ANGLE--------------------------//////
 float angle, angle_output, total_angle_input, last_angle, e_angle, setpoint = 0;
-float Kp_a = 60;
-float Ki_a = 600;
-float Kd_a = 6;
+float Kp_a = 70; //60
+float Ki_a = 700; //600
+float Kd_a = 9; //6
 //////----------------------------------------------------------//////
 
 
@@ -34,13 +34,35 @@ float xung;
 //////----------------------------------------------------------//////
 
 float total_output;
-float T = 0.005;
+float T = 0.01;
+
+
+
+
 unsigned long prevTime = millis();
 char userInput = 'n';
 
 void Demxung(){
   if(digitalRead(4) == LOW) xung++;
   else xung--;
+}
+
+void right(){
+  digitalWrite(in1,HIGH);
+  digitalWrite(in2,LOW);
+  digitalWrite(in3,HIGH);
+  digitalWrite(in4,LOW);
+  analogWrite(enB,255);
+  analogWrite(enA,255);
+}
+
+void left(){
+  digitalWrite(in1,LOW);
+  digitalWrite(in2,HIGH);
+  digitalWrite(in3,LOW);
+  digitalWrite(in4,HIGH);
+  analogWrite(enB,255);
+  analogWrite(enA,255);
 }
 
 void back(){
@@ -74,10 +96,10 @@ void PID(){
   
   //////---------------------------ANGLE--------------------------//////
   angle = locnhieu.updateEstimate(mpu6050.getAngleY());
-  Serial.println(angle);
+  //Serial.println(angle);
   angle = setpoint - angle + e_angle;
   total_angle_input += angle;
-  total_angle_input = constrain(total_angle_input, -300, 300);
+  total_angle_input = constrain(total_angle_input, -350, 350);
   angle_output = angle*Kp_a + Ki_a*total_angle_input*T + Kd_a*(angle - last_angle) / T;
   last_angle = angle;
   //////----------------------------------------------------------//////
@@ -107,6 +129,24 @@ void PID(){
   }
   else stop();
   //////---------------------------------------------------------//////
+  if (userInput != 'n'){
+    if (userInput == 'f'){
+      setpoint = 1.5;
+    }
+    else if(userInput == 's'){
+      setpoint = 0;
+    }
+    else if(userInput == 'b'){
+      setpoint = -1.5;
+    }
+    else if(userInput == 'l'){
+      left();
+    }
+    else if(userInput == 'r'){
+      right();
+    }
+    userInput = 'n';
+  }
 }
 
 void setup(){
@@ -125,7 +165,7 @@ void setup(){
   last_angle = 0; total_angle_input = 0; e_angle = -5;
 
   //attachInterrupt(0, Demxung, FALLING);
-  Timer1.initialize(5000);
+  Timer1.initialize(10000);
   Timer1.attachInterrupt(PID);
 }
 
@@ -137,19 +177,4 @@ void loop(){
       userInput = bluetooth.read();
       prevTime = currentTime;
   }
-  if (userInput != 'n'){
-    if (userInput == 'f'){
-      setpoint = 1;
-    }
-    else if(userInput == 's'){
-      setpoint = 0;
-    }
-    else if(userInput == 'b'){
-      setpoint = -1.5;
-    }
-    userInput = 'n';
-  }
 }
-
-
-
