@@ -42,10 +42,10 @@ float T = 0.01;
 unsigned long prevTime = millis();
 char userInput = 'n';
 
-void Demxung(){
+/*void Demxung(){
   if(digitalRead(4) == LOW) xung++;
   else xung--;
-}
+}*/
 
 void right(){
   digitalWrite(in1,HIGH);
@@ -92,6 +92,27 @@ void stop(){
   analogWrite(enA,0);
 }
 
+void control(){
+  if (userInput != 'n'){
+    if (userInput == 'f'){
+      forward();
+    }
+    else if(userInput == 's'){
+      setpoint = 0;
+    }
+    else if(userInput == 'b'){
+      setpoint = -1.5;
+    }
+    else if(userInput == 'l'){
+      left();
+    }
+    else if(userInput == 'r'){
+      right();
+    }
+    userInput = 'n';
+  }
+}
+
 void PID(){
   
   //////---------------------------ANGLE--------------------------//////
@@ -129,24 +150,7 @@ void PID(){
   }
   else stop();
   //////---------------------------------------------------------//////
-  if (userInput != 'n'){
-    if (userInput == 'f'){
-      setpoint = 1.5;
-    }
-    else if(userInput == 's'){
-      setpoint = 0;
-    }
-    else if(userInput == 'b'){
-      setpoint = -1.5;
-    }
-    else if(userInput == 'l'){
-      left();
-    }
-    else if(userInput == 'r'){
-      right();
-    }
-    userInput = 'n';
-  }
+  control();
 }
 
 void setup(){
