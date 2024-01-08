@@ -1,8 +1,9 @@
+
 # -*- coding: utf-8 -*-
 #
 # Dang Huu Tuan Phong - 21151476 (LonerP)
 #
-# WARNING: Hieu code thi sua, eo hieu thi thoi
+#
 
 import time
 import serial.tools.list_ports
@@ -591,6 +592,7 @@ class Ui_MainWindow(object):
         self.time=[]
         self.angle=[]
         self.ax = self.fig.subplots(1, 1)  
+        self.ax.set_title("Giá trị góc nghiêng")
         self.ax.set_ylabel("Theta (degree)")
         self.ax.set_xlabel("Time (s)")
 
@@ -646,45 +648,43 @@ class Ui_MainWindow(object):
         self.actionCopy.setText(_translate("MainWindow", "Copy"))
         self.actionPaste.setText(_translate("MainWindow", "Paste"))
 
-    def scan_ports(self):
-        self.Portbox.clear()
-        available_ports = list(serial.tools.list_ports.comports())
-        for port in available_ports:
+    def scan_ports(self):                                               # Hàm quét các cổng COM
+        self.Portbox.clear()                                            # Xoá các giá trị cổng COM trên QComboBox Portbox nếu đã quét từ trước
+        available_ports = list(serial.tools.list_ports.comports())      # Gán giá trị của biến available_ports bằng danh sách các cổng COM
+        for port in available_ports:                                    # Lần lượt thêm từng cổng COM hiển thị lên Portbox
             self.Portbox.addItem(port.device)
-        self.status_label.setText("Đã quét xong các cổng COM.")
+        self.status_label.setText("Đã quét xong các cổng COM.")         # Báo đã hoàn thành quét lên QLabel status_label
 
-    def connect_port(self):
-        selected_port = self.Portbox.currentText()
-        self.port = selected_port
-        if selected_port:
-            self.status_label.setText(f"Đang kết nối đến {selected_port}...")
-            self.serial_thread = threading.Thread(target=self.connect_thread, args=(selected_port,))
-            self.serial_thread.daemon = True
-            self.serial_thread.start()
+    def connect_port(self):                                             # Hàm kết nối tới cổng COM
+        selected_port = self.Portbox.currentText()                      # Gán giá trị của biến available_ports bằng danh sách các cổng COM
+        if selected_port:                                         
+            self.status_label.setText(f"Đang kết nối đến {selected_port}...")           #Hiển thị lên status_label trạng thái đang kết nối
+            self.serial_thread = threading.Thread(target=self.connect_thread, args=(selected_port,))    # Khởi tạo thread kết nối connect_thread
+            self.serial_thread.daemon = True                            # Khai báo thread là một daemon
+            self.serial_thread.start()                                  # Khởi chạy serial_thread
         else:
-            self.status_label.setText("Chưa chọn cổng COM.")
+            self.status_label.setText("Chưa chọn cổng COM.")            # Hiển thị lên status_label trạng thái chưa chọn cổng COM
 
     def connect_thread(self, selected_port):
-        baudrate = int(self.Bdbox.currentText())
-        self.bd = baudrate
+        baudrate = int(self.Bdbox.currentText())                        #Biến baudrate bằng giá trị hiện tại của QComboBox Bdbox
         try:
-            self.serial_connection = serial.Serial(selected_port, baudrate, timeout=5)
-            self.is_connected = True  # Đã kết nối thành công
-            self.status_label.setText(f"Kết nối đến {selected_port} thành công.")
-            self.Connect.setEnabled(False)
-        except serial.SerialException:
+            self.serial_connection = serial.Serial(selected_port, baudrate, timeout=5)  # Kết nối tới cổng COM đã chọn
+            self.is_connected = True                                    # Đã kết nối thành công
+            self.status_label.setText(f"Kết nối đến {selected_port} thành công.")       # Hiển thị kết nối thành công lên
+            self.Connect.setEnabled(False)                              # Vô hiệu nút Connect
+        except serial.SerialException:                                  # Nếu xuất hiện lỗi kết nối
             self.is_connected = False
-            self.status_label.setText(f"Kết nối đến {selected_port} thất bại.")
+            self.status_label.setText(f"Kết nối đến {selected_port} thất bại.") # Hiển thị lên status_label kết nối đến cổng COM thất bại
 
-    def disconnect_port(self):
+    def disconnect_port(self):                                          # Hàm ngắt kết nối cổng COM
         if self.serial_connection is not None:
-            self.serial_connection.close()
-            self.status_label.setText("Ngắt kết nối.")
-            self.is_connected = False
-            self.Connect.setEnabled(True)
-            self.Kpline_2.clear()
-            self.Kiline_2.clear()
-            self.Kdline_2.clear()
+            self.serial_connection.close()                              # Ngắt kết nối cổng COM
+            self.status_label.setText("Ngắt kết nối.")                  # Hiển thị trạng thái ngắt kết nối lên status_label
+            self.is_connected = False                                   
+            self.Connect.setEnabled(True)                               # Cho phép tương tác với nút Connect
+        #     self.Kpline_2.clear()                                     
+        #     self.Kiline_2.clear()
+        #     self.Kdline_2.clear()
         else:
             self.status_label.setText("Không có kết nối cổng COM nào đang mở.")
 
@@ -755,7 +755,7 @@ class Ui_MainWindow(object):
             try:
                 if self.serial_connection is not None and self.serial_connection.is_open:
                     self.serial_connection.write(b'f\n')
-                    self.status_label.setText(f"Go forward")
+                    self.status_label.setText(f"Go forward ▲")
                 else:
                     self.status_label.setText("Chưa kết nối với cổng COM.")
             except Exception:
@@ -768,7 +768,7 @@ class Ui_MainWindow(object):
             try:
                 if self.serial_connection is not None and self.serial_connection.is_open:
                     self.serial_connection.write(b'b\n')
-                    self.status_label.setText(f"Go backward")
+                    self.status_label.setText(f"Go backward ▼")
                 else:
                     self.status_label.setText("Chưa kết nối với cổng COM.")
             except Exception:
@@ -803,8 +803,8 @@ class Ui_MainWindow(object):
                                         pass
                         
                         self.time.append(len(self.time))
-                        self.angle = self.angle[-100:]
-                        self.time = self.time[-100:]
+                        self.angle = self.angle[-1200:]         #SỐ DỮ LIỆU HIỂN THỊ ĐƯỢC TRÊN TRỤC X
+                        self.time = self.time[-1200:]
                         
                         #self.angle.append(np.random.uniform(-90,90))
                 
@@ -813,7 +813,7 @@ class Ui_MainWindow(object):
                 
                         self._line.set_data(np.arange(len(self.time)), self.angle)
                         self.ax.set_xlim(0, len(self.time))
-                        self.ax.set_ylim(-20, 20)
+                        self.ax.set_ylim(-2, 2)                 #GIỚI HẠN HIỂN THỊ DỮ LIỆU TRỤC Y
                 
                         self.canvas.draw()
                         self.Data.clear()
